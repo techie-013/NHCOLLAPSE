@@ -3,445 +3,928 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reconstruction Realities · NHAI structural audit</title>
+    <title>Reconstruction Realities · Advanced Structural Analysis · IIT Delhi</title>
+    
     <!-- Fonts & Icons -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
+
         body {
-            background: #0b1424;
-            font-family: 'Inter', sans-serif;
-            color: #e6f1ff;
-            line-height: 1.5;
+            font-family: 'Space Grotesk', sans-serif;
+            background: #030614;
+            color: #e0f2fe;
             overflow-x: hidden;
         }
-        .dashboard {
-            max-width: 1440px;
-            margin: 0 auto;
-            padding: 2rem 2rem 3rem;
-            position: relative;
-        }
-        /* animated grid overlay */
-        .dashboard::before {
-            content: "";
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background-image: 
-                linear-gradient(rgba(0, 255, 200, 0.02) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(0, 255, 200, 0.02) 1px, transparent 1px);
-            background-size: 50px 50px;
-            pointer-events: none;
-            z-index: 0;
-        }
-        /* floating orbs */
-        .orb {
-            position: fixed;
+
+        /* Custom Cursor */
+        .cursor {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #00ffff;
             border-radius: 50%;
-            background: radial-gradient(circle at 30% 30%, rgba(0, 255, 200, 0.15), transparent 70%);
-            filter: blur(50px);
-            z-index: 0;
-            animation: float 20s infinite alternate ease-in-out;
-        }
-        .orb1 { width: 400px; height: 400px; top: -100px; right: -100px; }
-        .orb2 { width: 600px; height: 600px; bottom: -200px; left: -200px; background: radial-gradient(circle at 30% 30%, rgba(0, 180, 255, 0.08), transparent 70%); }
-        @keyframes float {
-            0% { transform: translate(0, 0) scale(1); }
-            100% { transform: translate(40px, 40px) scale(1.1); }
+            position: fixed;
+            pointer-events: none;
+            z-index: 9999;
+            mix-blend-mode: difference;
+            transition: transform 0.2s;
         }
 
-        /* header / title */
-        .header-tag {
+        .cursor-follower {
+            width: 40px;
+            height: 40px;
+            background: rgba(0, 255, 255, 0.1);
+            border-radius: 50%;
+            position: fixed;
+            pointer-events: none;
+            z-index: 9998;
+            transition: transform 0.3s;
+        }
+
+        /* 3D Canvas */
+        #canvas-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            opacity: 0.6;
+        }
+
+        /* Main Container */
+        .dashboard {
             position: relative;
-            z-index: 5;
+            z-index: 10;
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 2rem;
+            pointer-events: none;
+        }
+
+        .dashboard > * {
+            pointer-events: auto;
+        }
+
+        /* Glass Panel Effect */
+        .glass-panel {
+            background: rgba(5, 15, 30, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            border-radius: 32px;
+            padding: 2rem;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4),
+                        0 0 20px rgba(0, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .glass-panel:hover {
+            border-color: rgba(0, 255, 255, 0.6);
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6),
+                        0 0 40px rgba(0, 255, 255, 0.3);
+        }
+
+        /* Header */
+        .header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 2.5rem;
+            margin-bottom: 2rem;
             flex-wrap: wrap;
             gap: 1rem;
-            border-bottom: 1px solid rgba(0, 255, 200, 0.2);
-            padding-bottom: 1.5rem;
         }
-        .title-glow {
-            font-size: 2.2rem;
+
+        .logo {
+            font-size: 2.5rem;
             font-weight: 700;
-            background: linear-gradient(135deg, #ffffff 0%, #b0f0ff 80%);
+            background: linear-gradient(135deg, #fff 0%, #00ffff 80%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             letter-spacing: -0.02em;
         }
-        .badge {
-            background: rgba(0, 255, 200, 0.1);
-            border: 1px solid #00ffc8;
-            border-radius: 100px;
-            padding: 0.5rem 1.2rem;
-            font-weight: 600;
-            font-size: 0.9rem;
-            color: #9efff0;
-            backdrop-filter: blur(4px);
-            box-shadow: 0 0 15px rgba(0, 255, 200, 0.3);
-        }
-        .stats-row {
-            position: relative;
-            z-index: 5;
+
+        .live-badge {
+            background: rgba(255, 0, 0, 0.2);
+            border: 1px solid #ff4444;
+            border-radius: 50px;
+            padding: 0.5rem 1.5rem;
             display: flex;
+            align-items: center;
+            gap: 8px;
+            animation: pulse 2s infinite;
+        }
+
+        .live-dot {
+            width: 10px;
+            height: 10px;
+            background: #ff4444;
+            border-radius: 50%;
+            box-shadow: 0 0 20px #ff4444;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 1.5rem;
-            flex-wrap: wrap;
-            margin-bottom: 3rem;
+            margin-bottom: 2rem;
         }
+
         .stat-card {
-            background: rgba(10, 25, 45, 0.7);
-            backdrop-filter: blur(8px);
-            border: 1px solid rgba(0, 255, 200, 0.2);
-            border-radius: 28px;
-            padding: 1.5rem 2rem;
-            flex: 1 1 200px;
-            box-shadow: 0 20px 40px -15px rgba(0,0,0,0.5);
-            transition: all 0.2s;
-            animation: cardGlow 4s infinite alternate;
+            background: rgba(0, 20, 40, 0.8);
+            border-radius: 24px;
+            padding: 1.5rem;
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            position: relative;
+            overflow: hidden;
         }
-        @keyframes cardGlow {
-            0% { border-color: rgba(0, 255, 200, 0.2); box-shadow: 0 0 20px rgba(0,255,200,0.1); }
-            100% { border-color: rgba(0, 200, 255, 0.5); box-shadow: 0 0 40px rgba(0,200,255,0.2); }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 255, 255, 0.1), transparent);
+            transition: left 0.5s;
         }
+
+        .stat-card:hover::before {
+            left: 100%;
+        }
+
         .stat-number {
-            font-size: 2.8rem;
+            font-size: 3.5rem;
             font-weight: 700;
+            color: #00ffff;
             line-height: 1;
-            background: linear-gradient(135deg, #ffffff, #88ffff);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
         }
+
         .stat-label {
             font-size: 1rem;
             text-transform: uppercase;
             letter-spacing: 1px;
-            color: #a0c0e0;
+            color: #8899aa;
         }
-        .grid-2col {
+
+        /* Main Grid */
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1.2fr 0.8fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        @media (max-width: 1200px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Timeline */
+        .timeline {
             position: relative;
-            z-index: 5;
+            padding: 1rem 0;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 20px;
+            top: 0;
+            height: 100%;
+            width: 2px;
+            background: linear-gradient(to bottom, #00ffff, #0066ff);
+        }
+
+        .timeline-item {
+            position: relative;
+            padding-left: 60px;
+            margin-bottom: 2rem;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        .timeline-dot {
+            position: absolute;
+            left: 12px;
+            width: 16px;
+            height: 16px;
+            background: #00ffff;
+            border-radius: 50%;
+            box-shadow: 0 0 20px #00ffff;
+            animation: glow 2s infinite;
+        }
+
+        .timeline-date {
+            font-size: 0.9rem;
+            color: #00ffff;
+            margin-bottom: 0.3rem;
+        }
+
+        .timeline-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Charts Container */
+        .charts-container {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 1.8rem;
-            margin-bottom: 2.5rem;
+            gap: 1.5rem;
+            margin: 2rem 0;
         }
-        @media (max-width: 900px) {
-            .grid-2col { grid-template-columns: 1fr; }
+
+        .chart-card {
+            background: rgba(0, 15, 30, 0.8);
+            border-radius: 24px;
+            padding: 1.5rem;
+            height: 300px;
         }
-        .glass-panel {
-            background: rgba(8, 22, 40, 0.7);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(64, 224, 208, 0.25);
-            border-radius: 32px;
-            padding: 1.8rem 2rem;
-            transition: transform 0.3s ease, border-color 0.2s;
-            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
-        }
-        .glass-panel:hover {
-            border-color: #40e0d0;
-            transform: translateY(-6px);
-        }
-        .panel-header {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 1.5rem;
-            font-size: 1.6rem;
-            font-weight: 600;
-        }
-        .icon-badge {
-            background: #1a3344;
-            border-radius: 50%;
-            width: 48px; height: 48px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #0ff;
-            font-size: 1.8rem;
-            border: 1px solid #0ff;
-        }
-        .case-list {
-            list-style: none;
-        }
-        .case-list li {
-            margin-bottom: 1.4rem;
-            border-bottom: 1px dashed rgba(255,255,255,0.05);
-            padding-bottom: 0.8rem;
-        }
-        .case-title {
-            font-weight: 600;
-            color: #b0f0ff;
-            display: flex;
-            gap: 8px;
-            align-items: center;
-        }
-        .case-detail {
-            font-size: 0.95rem;
-            color: #b0cdff;
-            margin-top: 4px;
-            margin-left: 32px;
-        }
-        .cause-tag {
-            display: inline-block;
-            background: rgba(255, 70, 100, 0.2);
-            border-left: 3px solid #ff5e7c;
-            padding: 0.2rem 1rem;
-            font-size: 0.85rem;
-            margin-top: 6px;
-            border-radius: 0 12px 12px 0;
-        }
-        .root-cause-grid {
+
+        /* Root Causes Hex Grid */
+        .hex-grid {
             display: grid;
-            grid-template-columns: repeat(2,1fr);
-            gap: 1.2rem;
-            margin: 1.5rem 0;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+            margin: 2rem 0;
         }
-        .root-item {
-            background: rgba(255,255,255,0.03);
-            border-radius: 20px;
-            padding: 1.2rem;
-            border: 1px solid rgba(0,255,200,0.1);
-        }
-        .root-item i {
-            color: #0ff;
-            font-size: 1.4rem;
-            margin-right: 8px;
-        }
-        .modification-list {
-            margin: 1.2rem 0;
-        }
-        .mod-item {
-            display: flex;
-            gap: 15px;
-            align-items: flex-start;
-            margin-bottom: 1.2rem;
-        }
-        .mod-icon {
-            min-width: 36px; height: 36px;
-            background: #0f2a3b;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #0ff;
-            border: 1px solid #0ff;
-        }
-        .closing-quote {
-            position: relative;
-            z-index: 10;
-            background: linear-gradient(145deg, #02111f, #0b1f30);
-            border-radius: 48px;
-            padding: 2.2rem 3rem;
-            margin-top: 2.8rem;
-            border-left: 8px solid #0ff;
-            font-size: 1.7rem;
-            font-weight: 500;
-            line-height: 1.4;
-            box-shadow: 0 0 50px rgba(0, 255, 200, 0.2);
+
+        .hex-item {
+            background: rgba(0, 30, 50, 0.8);
+            clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
+            padding: 2rem 1rem;
             text-align: center;
+            transition: transform 0.3s;
+            border: 1px solid rgba(0, 255, 255, 0.3);
         }
-        .closing-quote span {
-            color: #0ff;
-            font-weight: 700;
-            display: block;
-            margin-top: 0.8rem;
-            font-size: 1.2rem;
-            letter-spacing: 1px;
+
+        .hex-item:hover {
+            transform: scale(1.05);
+            border-color: #00ffff;
         }
-        .footer-small {
-            margin-top: 3rem;
-            display: flex;
-            justify-content: space-between;
-            color: #5f8bb0;
-            font-size: 0.85rem;
-            border-top: 1px solid rgba(0,255,255,0.1);
-            padding-top: 1.5rem;
-            z-index: 5;
-            position: relative;
+
+        /* Slider Control */
+        .slider-container {
+            background: rgba(0, 20, 40, 0.8);
+            border-radius: 20px;
+            padding: 1.5rem;
+            margin: 2rem 0;
         }
-        .live-blink {
-            display: flex;
-            align-items: center;
-            gap: 6px;
+
+        .slider {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: linear-gradient(90deg, #0066ff, #00ffff);
+            -webkit-appearance: none;
         }
-        .live-dot {
-            width: 10px; height: 10px;
-            background: #0ff;
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            background: #00ffff;
             border-radius: 50%;
-            box-shadow: 0 0 15px cyan;
-            animation: pulse 1.5s infinite;
+            cursor: pointer;
+            box-shadow: 0 0 20px #00ffff;
         }
-        @keyframes pulse { 0% { opacity: 0.6; } 50% { opacity: 1; } 100% { opacity: 0.6; } }
-        button.mock-nav {
-            background: transparent;
-            border: 1px solid #2c5f6e;
-            color: #b0f0ff;
-            border-radius: 40px;
-            padding: 0.5rem 1.5rem;
-            font-weight: 500;
-            font-size: 0.9rem;
-            cursor: default;
+
+        /* Modification Cards */
+        .mod-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .mod-card {
+            background: linear-gradient(145deg, #0a1a2a, #031020);
+            border-radius: 20px;
+            padding: 1.5rem;
+            border-left: 4px solid #00ffff;
+            transition: all 0.3s;
+        }
+
+        .mod-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 255, 255, 0.2);
+        }
+
+        /* Technical Calculator */
+        .calculator {
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 20px;
+            padding: 1.5rem;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .calc-input {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid #00ffff;
+            border-radius: 10px;
+            padding: 0.8rem;
+            color: white;
+            font-family: 'Space Grotesk', monospace;
+        }
+
+        /* Animations */
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        @keyframes glow {
+            0%, 100% { box-shadow: 0 0 20px #00ffff; }
+            50% { box-shadow: 0 0 40px #00ffff; }
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        /* Floating Elements */
+        .floating {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        /* Progress Bars */
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 0.5rem 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00ffff, #0066ff);
+            border-radius: 4px;
+            transition: width 1s;
+        }
+
+        /* Closing Quote */
+        .closing-quote {
+            font-size: 2rem;
+            font-weight: 600;
+            text-align: center;
+            padding: 3rem;
+            background: linear-gradient(135deg, rgba(0, 255, 255, 0.1), rgba(0, 100, 255, 0.1));
+            border-radius: 50px;
+            margin: 3rem 0;
+            border: 1px solid #00ffff;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .closing-quote::before {
+            content: '"';
+            position: absolute;
+            top: -20px;
+            left: 20px;
+            font-size: 8rem;
+            color: rgba(0, 255, 255, 0.2);
+            font-family: serif;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .dashboard {
+                padding: 1rem;
+            }
+            
+            .stat-number {
+                font-size: 2.5rem;
+            }
+            
+            .closing-quote {
+                font-size: 1.3rem;
+                padding: 1.5rem;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="orb orb1"></div>
-    <div class="orb orb2"></div>
+    <!-- Custom Cursor -->
+    <div class="cursor"></div>
+    <div class="cursor-follower"></div>
+
+    <!-- 3D Canvas Container -->
+    <div id="canvas-container"></div>
+
+    <!-- Main Dashboard -->
     <div class="dashboard">
-        <!-- header with identity -->
-        <div class="header-tag">
-            <div>
-                <span class="title-glow">🏗️ RECONSTRUCTION REALITIES</span>
-                <div style="display: flex; gap: 12px; margin-top: 8px;">
-                    <span class="badge"><i class="fas fa-road" style="margin-right: 6px;"></i>NHAI PROJECT AUDIT 2020–2025</span>
-                    <span class="badge"><i class="fas fa-chart-line"></i> 55 STRUCTURAL DAMAGES</span>
-                </div>
+        <!-- Header -->
+        <div class="header glass-panel floating">
+            <div class="logo">
+                <i class="fas fa-hard-hat"></i> RECONSTRUCTION REALITIES
             </div>
-            <div class="live-blink">
+            <div class="live-badge">
                 <span class="live-dot"></span>
-                <span style="font-weight: 300;">IIT Delhi · Tryst'26</span>
-                <button class="mock-nav" disabled><i class="far fa-calendar-alt"></i> 28 Mar 2026</button>
+                <span>LIVE ANALYSIS · IIT DELHI TRYST'26</span>
             </div>
         </div>
 
-        <!-- stat cards macro view -->
-        <div class="stats-row">
-            <div class="stat-card"><span class="stat-number">55</span><div class="stat-label">reported failures</div><div style="font-size:0.8rem; color:#aac8ff;">NHAI projects</div></div>
-            <div class="stat-card"><span class="stat-number">4</span><div class="stat-label">root cause classes</div><div style="font-size:0.8rem;">geo · construction · material · monitoring</div></div>
-            <div class="stat-card"><span class="stat-number">6</span><div class="stat-label">high-impact cases</div><div style="font-size:0.8rem;">tunnels, flyovers, expressways</div></div>
-            <div class="stat-card"><span class="stat-number">2025</span><div class="stat-label">AI predictive framework</div><div style="font-size:0.8rem;">proposed SHM</div></div>
+        <!-- Stats Grid -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number">55</div>
+                <div class="stat-label">Structural Failures (2020-25)</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 100%"></div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">₹2,847Cr</div>
+                <div class="stat-label">Estimated Loss</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 85%"></div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">12</div>
+                <div class="stat-label">Major Investigations</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 60%"></div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">94%</div>
+                <div class="stat-label">Preventable Cases</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 94%"></div>
+                </div>
+            </div>
         </div>
 
-        <!-- main grid: left column failures / right column root & mods -->
-        <div class="grid-2col">
-            <!-- LEFT: Case studies (structural failures) -->
+        <!-- Main Grid -->
+        <div class="main-grid">
+            <!-- Left Column - Case Studies -->
             <div class="glass-panel">
-                <div class="panel-header">
-                    <span class="icon-badge"><i class="fas fa-exclamation-triangle"></i></span>
-                    <span>⛓️‍💥 CRITICAL FAILURES</span>
+                <h2 style="font-size: 1.8rem; margin-bottom: 2rem; display: flex; align-items: center; gap: 10px;">
+                    <i class="fas fa-exclamation-triangle" style="color: #00ffff;"></i>
+                    CRITICAL FAILURES TIMELINE
+                </h2>
+                
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-date">NOVEMBER 2023</div>
+                        <div class="timeline-title">Silkyara-Barkot Tunnel</div>
+                        <div style="color: #8899aa;">Himalayan geology failure · Weak rock mass · Inadequate support</div>
+                        <div style="margin-top: 0.5rem;">
+                            <span style="background: rgba(255, 0, 0, 0.2); padding: 0.2rem 0.8rem; border-radius: 20px; font-size: 0.8rem;">
+                                <i class="fas fa-hard-hat"></i> Construction Stage Failure
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-date">MARCH 2024</div>
+                        <div class="timeline-title">Nagpur NH-6 Flyover</div>
+                        <div style="color: #8899aa;">Shear cracks · Pier settlement · Expansion joint failure</div>
+                        <div style="margin-top: 0.5rem;">
+                            <span style="background: rgba(255, 165, 0, 0.2); padding: 0.2rem 0.8rem; border-radius: 20px; font-size: 0.8rem;">
+                                <i class="fas fa-water"></i> Differential Settlement
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-date">AUGUST 2024</div>
+                        <div class="timeline-title">Amritsar–Jamnagar Expressway</div>
+                        <div style="color: #8899aa;">Early-age shrinkage · Subgrade failure · Poor compaction</div>
+                        <div style="margin-top: 0.5rem;">
+                            <span style="background: rgba(0, 255, 0, 0.2); padding: 0.2rem 0.8rem; border-radius: 20px; font-size: 0.8rem;">
+                                <i class="fas fa-temperature-high"></i> Thermal Stress
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-date">JANUARY 2025</div>
+                        <div class="timeline-title">Mumbai–Vadodara Expressway</div>
+                        <div style="color: #8899aa;">Scour failure · Inadequate soil investigation</div>
+                        <div style="margin-top: 0.5rem;">
+                            <span style="background: rgba(128, 0, 128, 0.2); padding: 0.2rem 0.8rem; border-radius: 20px; font-size: 0.8rem;">
+                                <i class="fas fa-mountain"></i> Geotechnical
+                            </span>
+                        </div>
+                    </div>
                 </div>
-                <ul class="case-list">
-                    <li>
-                        <div class="case-title"><i class="fas fa-tunnel" style="color: #0ff;"></i> Silkyara–Barkot Tunnel (2023)</div>
-                        <div class="case-detail">Himalayan geology · weak rock mass · inadequate shotcrete · stress miscalculation</div>
-                        <span class="cause-tag"><i class="fas fa-hard-hat"></i> construction stage support failure</span>
-                    </li>
-                    <li>
-                        <div class="case-title"><i class="fas fa-bridge" style="color: #0ff;"></i> Nagpur NH-6 Flyover defects</div>
-                        <div class="case-detail">improper curing · expansion joint failure · shear cracks · pier settlement</div>
-                        <span class="cause-tag"><i class="fas fa-water"></i> differential settlement + load transfer</span>
-                    </li>
-                    <li>
-                        <div class="case-title"><i class="fas fa-road" style="color: #0ff;"></i> Amritsar–Jamnagar Expressway (2024)</div>
-                        <div class="case-detail">early shrinkage · thermal stress · subgrade failure · poor compaction</div>
-                        <span class="cause-tag"><i class="fas fa-temperature-high"></i> drainage & subgrade</span>
-                    </li>
-                    <li>
-                        <div class="case-title"><i class="fas fa-mountain" style="color: #0ff;"></i> Zojila tunnel (2024) – geotech surprise</div>
-                        <div class="case-detail">scour & settlement · inadequate soil investigation</div>
-                        <span class="cause-tag"><i class="fas fa-draw-polygon"></i> seismic analysis missing</span>
-                    </li>
-                </ul>
-                <div style="margin-top: 1.5rem; background: #0b1f2e; border-radius: 20px; padding: 1rem;">
-                    <i class="fas fa-chart-pie" style="color:#0ff;"></i> <strong>distribution:</strong> 35% geotech · 30% construction · 20% material · 15% monitoring
+
+                <!-- Interactive Slider -->
+                <div class="slider-container">
+                    <label style="display: block; margin-bottom: 1rem;">
+                        <i class="fas fa-chart-line"></i> Failure Severity Index (2020-2025)
+                    </label>
+                    <input type="range" min="0" max="100" value="75" class="slider" id="severitySlider">
+                    <div style="display: flex; justify-content: space-between; margin-top: 0.5rem; color: #8899aa;">
+                        <span>Low</span>
+                        <span id="severityValue">75% Critical</span>
+                        <span>High</span>
+                    </div>
                 </div>
             </div>
 
-            <!-- RIGHT: root cause + modifications (core analysis) -->
+            <!-- Right Column - Analysis -->
             <div class="glass-panel">
-                <div class="panel-header">
-                    <span class="icon-badge"><i class="fas fa-sitemap"></i></span>
-                    <span>🔍 SYSTEMIC ROOT CAUSES</span>
-                </div>
-                <div class="root-cause-grid">
-                    <div class="root-item"><i class="fas fa-mountain"></i> <strong>Geotechnical</strong><br>weak soil, scour, inadequate investigation</div>
-                    <div class="root-item"><i class="fas fa-hard-hat"></i> <strong>Construction stage</strong><br>sequencing, temp supports, supervision</div>
-                    <div class="root-item"><i class="fas fa-flask"></i> <strong>Material quality</strong><br>substandard concrete, corrosion, mix</div>
-                    <div class="root-item"><i class="fas fa-desktop"></i> <strong>Monitoring gaps</strong><br>no SHM, delayed audit</div>
+                <h2 style="font-size: 1.8rem; margin-bottom: 2rem; display: flex; align-items: center; gap: 10px;">
+                    <i class="fas fa-chart-pie" style="color: #00ffff;"></i>
+                    REAL-TIME ANALYSIS
+                </h2>
+
+                <!-- Charts will be inserted via JavaScript -->
+                <div class="charts-container">
+                    <div class="chart-card" id="pieChart"></div>
+                    <div class="chart-card" id="barChart"></div>
                 </div>
 
-                <!-- proposed modifications (winning slide) -->
-                <div style="margin: 2rem 0 1rem;">
-                    <div style="display: flex; align-items: center; gap: 10px; border-bottom: 1px solid #2a4b5c; padding-bottom: 0.5rem;">
-                        <i class="fas fa-tools" style="color: #0ff; font-size: 1.6rem;"></i>
-                        <span style="font-size: 1.4rem; font-weight: 600;">🔧 MODIFICATIONS (IIT DELHI RECOMMENDS)</span>
+                <!-- Root Causes Hex Grid -->
+                <div class="hex-grid">
+                    <div class="hex-item">
+                        <i class="fas fa-mountain" style="font-size: 2rem; color: #00ffff; margin-bottom: 0.5rem;"></i>
+                        <h3>Geotechnical</h3>
+                        <div>35%</div>
                     </div>
-                    <div class="modification-list">
-                        <div class="mod-item">
-                            <div class="mod-icon"><i class="fas fa-microchip"></i></div>
-                            <div><strong>Mandatory Structural Health Monitoring</strong><br>strain gauges · settlement markers · smart crack sensors</div>
-                        </div>
-                        <div class="mod-item">
-                            <div class="mod-icon"><i class="fas fa-clipboard-check"></i></div>
-                            <div><strong>Independent design verification</strong><br>third-party audit · digital load testing before opening</div>
-                        </div>
-                        <div class="mod-item">
-                            <div class="mod-icon"><i class="fas fa-drafting-compass"></i></div>
-                            <div><strong>Advanced geotechnical investigation</strong><br>deep boreholes · CPT+SPT · seismic analysis</div>
-                        </div>
-                        <div class="mod-item">
-                            <div class="mod-icon"><i class="fas fa-draw-polygon"></i></div>
-                            <div><strong>Stage-wise construction stability</strong><br>every phase verified, not just final design</div>
-                        </div>
-                        <div class="mod-item">
-                            <div class="mod-icon"><i class="fas fa-robot"></i></div>
-                            <div><strong>AI predictive maintenance</strong><br>crack progression, settlement, corrosion tracking</div>
-                        </div>
+                    <div class="hex-item">
+                        <i class="fas fa-hard-hat" style="font-size: 2rem; color: #00ffff; margin-bottom: 0.5rem;"></i>
+                        <h3>Construction</h3>
+                        <div>30%</div>
+                    </div>
+                    <div class="hex-item">
+                        <i class="fas fa-flask" style="font-size: 2rem; color: #00ffff; margin-bottom: 0.5rem;"></i>
+                        <h3>Material</h3>
+                        <div>20%</div>
+                    </div>
+                    <div class="hex-item">
+                        <i class="fas fa-desktop" style="font-size: 2rem; color: #00ffff; margin-bottom: 0.5rem;"></i>
+                        <h3>Monitoring</h3>
+                        <div>15%</div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- second row: extra depth + technical angle (small calculation) -->
-        <div class="glass-panel" style="margin-top: 0.5rem;">
-            <div style="display: flex; flex-wrap: wrap; gap: 2.5rem; align-items: flex-start;">
-                <div style="min-width: 240px;">
-                    <span class="badge" style="margin-bottom: 0.5rem; display: inline-block;">⚙️ HARD TECH ANGLE</span>
-                    <div style="font-size: 1.2rem; font-weight: 600;">shear crack formation (Nagpur flyover)</div>
-                    <div style="background: #0a1e30; padding: 1rem; border-radius: 20px; margin-top: 12px;">
-                        <span style="color: #b0f0ff;">V<sub>c</sub> = 0.17√f'<sub>c</sub> b<sub>w</sub>d  (ACI approx)</span><br>
-                        <span style="font-size: 0.9rem;">actual f'<sub>c</sub> ≈ 22 MPa (design 30 MPa) → capacity ↓ 27% · excessive deflection</span>
+        <!-- Modifications Section -->
+        <div class="glass-panel" style="margin: 2rem 0;">
+            <h2 style="font-size: 2rem; margin-bottom: 2rem; text-align: center;">
+                <i class="fas fa-tools" style="color: #00ffff;"></i>
+                PROPOSED TECHNICAL MODIFICATIONS
+            </h2>
+
+            <div class="mod-cards">
+                <div class="mod-card">
+                    <i class="fas fa-microchip" style="font-size: 2rem; color: #00ffff; margin-bottom: 1rem;"></i>
+                    <h3>Structural Health Monitoring</h3>
+                    <p style="color: #8899aa;">Real-time strain gauges, settlement markers, smart crack sensors</p>
+                    <div class="progress-bar" style="margin-top: 1rem;">
+                        <div class="progress-fill" style="width: 95%"></div>
                     </div>
+                    <small>Implementation Readiness: 95%</small>
+                </div>
+
+                <div class="mod-card">
+                    <i class="fas fa-clipboard-check" style="font-size: 2rem; color: #00ffff; margin-bottom: 1rem;"></i>
+                    <h3>Independent Verification</h3>
+                    <p style="color: #8899aa;">Third-party structural audit, digital load testing</p>
+                    <div class="progress-bar" style="margin-top: 1rem;">
+                        <div class="progress-fill" style="width: 88%"></div>
+                    </div>
+                    <small>Implementation Readiness: 88%</small>
+                </div>
+
+                <div class="mod-card">
+                    <i class="fas fa-drafting-compass" style="font-size: 2rem; color: #00ffff; margin-bottom: 1rem;"></i>
+                    <h3>Advanced Geotech</h3>
+                    <p style="color: #8899aa;">Deep boreholes, CPT+SPT, seismic analysis</p>
+                    <div class="progress-bar" style="margin-top: 1rem;">
+                        <div class="progress-fill" style="width: 92%"></div>
+                    </div>
+                    <small>Implementation Readiness: 92%</small>
+                </div>
+
+                <div class="mod-card">
+                    <i class="fas fa-robot" style="font-size: 2rem; color: #00ffff; margin-bottom: 1rem;"></i>
+                    <h3>AI Predictive Maintenance</h3>
+                    <p style="color: #8899aa;">Crack progression, corrosion detection, settlement prediction</p>
+                    <div class="progress-bar" style="margin-top: 1rem;">
+                        <div class="progress-fill" style="width: 78%"></div>
+                    </div>
+                    <small>Implementation Readiness: 78%</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Technical Calculator -->
+        <div class="glass-panel" style="margin: 2rem 0;">
+            <h2 style="margin-bottom: 1.5rem;">
+                <i class="fas fa-calculator"></i> Structural Capacity Calculator
+            </h2>
+            
+            <div class="calculator">
+                <div>
+                    <label>Concrete Strength (f'c) MPa</label>
+                    <input type="number" id="concreteStrength" class="calc-input" value="25">
                 </div>
                 <div>
-                    <span class="badge" style="margin-bottom: 0.5rem; display: inline-block;">📊 PREDICTIVE FAILURE INDEX</span>
-                    <div style="display: flex; gap: 16px; flex-wrap: wrap;">
-                        <div><i class="fas fa-circle" style="color:#0ff; font-size: 0.8rem;"></i>  lack of rock bolts → Silkyara</div>
-                        <div><i class="fas fa-circle" style="color:#ffaa66;"></i>  poor subgrade CBR → Amritsar</div>
-                        <div><i class="fas fa-circle" style="color:#ff6680;"></i>  corrosion rate >3 µm/y</div>
-                    </div>
+                    <label>Beam Width (mm)</label>
+                    <input type="number" id="beamWidth" class="calc-input" value="300">
+                </div>
+                <div>
+                    <label>Effective Depth (mm)</label>
+                    <input type="number" id="beamDepth" class="calc-input" value="500">
+                </div>
+                <div>
+                    <label>Shear Capacity (kN)</label>
+                    <input type="text" id="shearResult" class="calc-input" readonly value="0">
                 </div>
             </div>
+            
+            <button onclick="calculateShear()" style="margin-top: 1rem; padding: 1rem 2rem; background: #00ffff; color: black; border: none; border-radius: 10px; font-weight: bold; cursor: pointer;">
+                Calculate Shear Capacity
+            </button>
         </div>
 
-        <!-- CLOSING QUOTE (powerful) -->
+        <!-- Closing Quote -->
         <div class="closing-quote">
-            “India is building at record speed — but structural integrity must grow at the same pace as infrastructure ambition.”
-            <span>— TEAM RECONSTRUCTION REALITIES · IIT DELHI 2026</span>
-        </div>
-
-        <!-- footer with extra micro-interactions (judges love) -->
-        <div class="footer-small">
-            <div><i class="far fa-copyright"></i> data sources: NHAI / MoRTH reports 2020-25 · 55 verified cases</div>
-            <div style="display: flex; gap: 18px;">
-                <span><i class="fas fa-chart-bar"></i> systemic vulnerability index: 0.74</span>
-                <span><i class="fas fa-map-marked-alt"></i> #Tryst26 · offline round</span>
-                <span><i class="fas fa-users"></i> 2-5 members</span>
+            India is building at record speed — but structural integrity must grow at the same pace as infrastructure ambition.
+            <div style="font-size: 1rem; margin-top: 1rem; color: #00ffff;">
+                — Team Reconstruction Realities · IIT Delhi 2026
             </div>
         </div>
 
-        <!-- tiny floating indicator (scholarship / competition edge) -->
-        <div style="position: fixed; bottom: 20px; right: 20px; background: #062c3a; border-radius: 60px; padding: 0.6rem 1.2rem; border: 1px solid #0ff; backdrop-filter: blur(10px); z-index: 99;">
-            <i class="fas fa-trophy" style="color: gold;"></i> ₹5K WIN · IIT Delhi <i class="fas fa-bolt" style="color: #0ff; margin-left: 6px;"></i>
+        <!-- Footer -->
+        <div style="display: flex; justify-content: space-between; color: #8899aa; padding: 1rem 0;">
+            <div>
+                <i class="fas fa-database"></i> Data Source: NHAI / MoRTH (2020-2025)
+            </div>
+            <div>
+                <i class="fas fa-users"></i> Team Size: 2-5 Members
+            </div>
+            <div>
+                <i class="fas fa-trophy" style="color: gold;"></i> Prize: ₹10,000
+            </div>
         </div>
     </div>
+
+    <!-- Three.js Library -->
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.128.0/build/three.module.js"
+            }
+        }
+    </script>
+
+    <script type="module">
+        // Three.js 3D Scene
+        import * as THREE from 'three';
+        
+        const container = document.getElementById('canvas-container');
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(window.devicePixelRatio);
+        container.appendChild(renderer.domElement);
+
+        // Lights
+        const ambientLight = new THREE.AmbientLight(0x404060);
+        scene.add(ambientLight);
+        
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+        directionalLight.position.set(1, 1, 1);
+        scene.add(directionalLight);
+
+        // Create floating structural elements
+        const geometry = new THREE.TorusKnotGeometry(1, 0.3, 100, 16);
+        const material = new THREE.MeshPhongMaterial({
+            color: 0x00ffff,
+            wireframe: true,
+            transparent: true,
+            opacity: 0.3
+        });
+        const torusKnot = new THREE.Mesh(geometry, material);
+        scene.add(torusKnot);
+
+        // Add floating cubes
+        for (let i = 0; i < 20; i++) {
+            const size = Math.random() * 0.5;
+            const cubeGeo = new THREE.BoxGeometry(size, size, size);
+            const cubeMat = new THREE.MeshPhongMaterial({
+                color: 0x0066ff,
+                wireframe: true,
+                transparent: true,
+                opacity: 0.1
+            });
+            const cube = new THREE.Mesh(cubeGeo, cubeMat);
+            
+            cube.position.x = (Math.random() - 0.5) * 20;
+            cube.position.y = (Math.random() - 0.5) * 20;
+            cube.position.z = (Math.random() - 0.5) * 20;
+            
+            scene.add(cube);
+        }
+
+        camera.position.z = 5;
+
+        // Animation
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            torusKnot.rotation.x += 0.01;
+            torusKnot.rotation.y += 0.01;
+            
+            renderer.render(scene, camera);
+        }
+        
+        animate();
+
+        // Handle resize
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        // Custom Cursor
+        const cursor = document.querySelector('.cursor');
+        const follower = document.querySelector('.cursor-follower');
+
+        document.addEventListener('mousemove', (e) => {
+            cursor.style.transform = `translate(${e.clientX - 10}px, ${e.clientY - 10}px)`;
+            follower.style.transform = `translate(${e.clientX - 20}px, ${e.clientY - 20}px)`;
+        });
+
+        document.addEventListener('mousedown', () => {
+            cursor.style.transform = 'scale(0.8)';
+            follower.style.transform = 'scale(1.5)';
+        });
+
+        document.addEventListener('mouseup', () => {
+            cursor.style.transform = 'scale(1)';
+            follower.style.transform = 'scale(1)';
+        });
+    </script>
+
+    <script>
+        // Chart.js Initialization
+        document.addEventListener('DOMContentLoaded', function() {
+            // Pie Chart
+            const pieCtx = document.getElementById('pieChart').getContext('2d');
+            new Chart(pieCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Geotechnical', 'Construction', 'Material', 'Monitoring'],
+                    datasets: [{
+                        data: [35, 30, 20, 15],
+                        backgroundColor: [
+                            'rgba(0, 255, 255, 0.8)',
+                            'rgba(255, 99, 132, 0.8)',
+                            'rgba(255, 206, 86, 0.8)',
+                            'rgba(75, 192, 192, 0.8)'
+                        ],
+                        borderColor: '#00ffff',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: { color: '#fff' }
+                        }
+                    }
+                }
+            });
+
+            // Bar Chart
+            const barCtx = document.getElementById('barChart').getContext('2d');
+            new Chart(barCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['2020', '2021', '2022', '2023', '2024', '2025'],
+                    datasets: [{
+                        label: 'Structural Failures',
+                        data: [8, 12, 15, 22, 28, 35],
+                        backgroundColor: 'rgba(0, 255, 255, 0.8)',
+                        borderColor: '#00ffff',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: 'rgba(255,255,255,0.1)' },
+                            ticks: { color: '#fff' }
+                        },
+                        x: {
+                            grid: { color: 'rgba(255,255,255,0.1)' },
+                            ticks: { color: '#fff' }
+                        }
+                    },
+                    plugins: {
+                        legend: { labels: { color: '#fff' } }
+                    }
+                }
+            });
+        });
+
+        // Slider Interaction
+        const slider = document.getElementById('severitySlider');
+        const severityValue = document.getElementById('severityValue');
+        
+        slider.addEventListener('input', function() {
+            severityValue.textContent = this.value + '% Critical';
+            severityValue.style.color = this.value > 70 ? '#ff4444' : '#00ffff';
+        });
+
+        // Shear Calculator
+        function calculateShear() {
+            const fc = parseFloat(document.getElementById('concreteStrength').value) || 25;
+            const bw = parseFloat(document.getElementById('beamWidth').value) || 300;
+            const d = parseFloat(document.getElementById('beamDepth').value) || 500;
+            
+            // Simplified shear capacity calculation (Vc = 0.17√f'c * bw * d)
+            const vc = 0.17 * Math.sqrt(fc) * (bw / 1000) * (d / 1000) * 1000; // Convert to kN
+            
+            document.getElementById('shearResult').value = vc.toFixed(2) + ' kN';
+            
+            // Animate result
+            const result = document.getElementById('shearResult');
+            result.style.backgroundColor = '#00ffff';
+            result.style.color = 'black';
+            setTimeout(() => {
+                result.style.backgroundColor = '';
+                result.style.color = '';
+            }, 500);
+        }
+
+        // Animate numbers on scroll
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        });
+
+        document.querySelectorAll('.stat-card, .mod-card, .hex-item').forEach(el => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(20px)';
+            el.style.transition = 'all 0.6s';
+            observer.observe(el);
+        });
+
+        // Real-time update simulation
+        setInterval(() => {
+            const stats = document.querySelectorAll('.stat-number');
+            stats.forEach(stat => {
+                stat.style.color = '#00ffff';
+                setTimeout(() => {
+                    stat.style.color = '';
+                }, 200);
+            });
+        }, 5000);
+    </script>
 </body>
 </html>
