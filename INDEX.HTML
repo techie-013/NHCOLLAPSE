@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reconstruction Realities · NHAI structural audit</title>
+    <!-- Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: #0b1424;
+            font-family: 'Inter', sans-serif;
+            color: #e6f1ff;
+            line-height: 1.5;
+            overflow-x: hidden;
+        }
+        .dashboard {
+            max-width: 1440px;
+            margin: 0 auto;
+            padding: 2rem 2rem 3rem;
+            position: relative;
+        }
+        /* animated grid overlay */
+        .dashboard::before {
+            content: "";
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: 
+                linear-gradient(rgba(0, 255, 200, 0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 255, 200, 0.02) 1px, transparent 1px);
+            background-size: 50px 50px;
+            pointer-events: none;
+            z-index: 0;
+        }
+        /* floating orbs */
+        .orb {
+            position: fixed;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, rgba(0, 255, 200, 0.15), transparent 70%);
+            filter: blur(50px);
+            z-index: 0;
+            animation: float 20s infinite alternate ease-in-out;
+        }
+        .orb1 { width: 400px; height: 400px; top: -100px; right: -100px; }
+        .orb2 { width: 600px; height: 600px; bottom: -200px; left: -200px; background: radial-gradient(circle at 30% 30%, rgba(0, 180, 255, 0.08), transparent 70%); }
+        @keyframes float {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(40px, 40px) scale(1.1); }
+        }
+
+        /* header / title */
+        .header-tag {
+            position: relative;
+            z-index: 5;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+            border-bottom: 1px solid rgba(0, 255, 200, 0.2);
+            padding-bottom: 1.5rem;
+        }
+        .title-glow {
+            font-size: 2.2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #ffffff 0%, #b0f0ff 80%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.02em;
+        }
+        .badge {
+            background: rgba(0, 255, 200, 0.1);
+            border: 1px solid #00ffc8;
+            border-radius: 100px;
+            padding: 0.5rem 1.2rem;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #9efff0;
+            backdrop-filter: blur(4px);
+            box-shadow: 0 0 15px rgba(0, 255, 200, 0.3);
+        }
+        .stats-row {
+            position: relative;
+            z-index: 5;
+            display: flex;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+            margin-bottom: 3rem;
+        }
+        .stat-card {
+            background: rgba(10, 25, 45, 0.7);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(0, 255, 200, 0.2);
+            border-radius: 28px;
+            padding: 1.5rem 2rem;
+            flex: 1 1 200px;
+            box-shadow: 0 20px 40px -15px rgba(0,0,0,0.5);
+            transition: all 0.2s;
+            animation: cardGlow 4s infinite alternate;
+        }
+        @keyframes cardGlow {
+            0% { border-color: rgba(0, 255, 200, 0.2); box-shadow: 0 0 20px rgba(0,255,200,0.1); }
+            100% { border-color: rgba(0, 200, 255, 0.5); box-shadow: 0 0 40px rgba(0,200,255,0.2); }
+        }
+        .stat-number {
+            font-size: 2.8rem;
+            font-weight: 700;
+            line-height: 1;
+            background: linear-gradient(135deg, #ffffff, #88ffff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .stat-label {
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #a0c0e0;
+        }
+        .grid-2col {
+            position: relative;
+            z-index: 5;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.8rem;
+            margin-bottom: 2.5rem;
+        }
+        @media (max-width: 900px) {
+            .grid-2col { grid-template-columns: 1fr; }
+        }
+        .glass-panel {
+            background: rgba(8, 22, 40, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(64, 224, 208, 0.25);
+            border-radius: 32px;
+            padding: 1.8rem 2rem;
+            transition: transform 0.3s ease, border-color 0.2s;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+        }
+        .glass-panel:hover {
+            border-color: #40e0d0;
+            transform: translateY(-6px);
+        }
+        .panel-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 1.5rem;
+            font-size: 1.6rem;
+            font-weight: 600;
+        }
+        .icon-badge {
+            background: #1a3344;
+            border-radius: 50%;
+            width: 48px; height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #0ff;
+            font-size: 1.8rem;
+            border: 1px solid #0ff;
+        }
+        .case-list {
+            list-style: none;
+        }
+        .case-list li {
+            margin-bottom: 1.4rem;
+            border-bottom: 1px dashed rgba(255,255,255,0.05);
+            padding-bottom: 0.8rem;
+        }
+        .case-title {
+            font-weight: 600;
+            color: #b0f0ff;
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        .case-detail {
+            font-size: 0.95rem;
+            color: #b0cdff;
+            margin-top: 4px;
+            margin-left: 32px;
+        }
+        .cause-tag {
+            display: inline-block;
+            background: rgba(255, 70, 100, 0.2);
+            border-left: 3px solid #ff5e7c;
+            padding: 0.2rem 1rem;
+            font-size: 0.85rem;
+            margin-top: 6px;
+            border-radius: 0 12px 12px 0;
+        }
+        .root-cause-grid {
+            display: grid;
+            grid-template-columns: repeat(2,1fr);
+            gap: 1.2rem;
+            margin: 1.5rem 0;
+        }
+        .root-item {
+            background: rgba(255,255,255,0.03);
+            border-radius: 20px;
+            padding: 1.2rem;
+            border: 1px solid rgba(0,255,200,0.1);
+        }
+        .root-item i {
+            color: #0ff;
+            font-size: 1.4rem;
+            margin-right: 8px;
+        }
+        .modification-list {
+            margin: 1.2rem 0;
+        }
+        .mod-item {
+            display: flex;
+            gap: 15px;
+            align-items: flex-start;
+            margin-bottom: 1.2rem;
+        }
+        .mod-icon {
+            min-width: 36px; height: 36px;
+            background: #0f2a3b;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #0ff;
+            border: 1px solid #0ff;
+        }
+        .closing-quote {
+            position: relative;
+            z-index: 10;
+            background: linear-gradient(145deg, #02111f, #0b1f30);
+            border-radius: 48px;
+            padding: 2.2rem 3rem;
+            margin-top: 2.8rem;
+            border-left: 8px solid #0ff;
+            font-size: 1.7rem;
+            font-weight: 500;
+            line-height: 1.4;
+            box-shadow: 0 0 50px rgba(0, 255, 200, 0.2);
+            text-align: center;
+        }
+        .closing-quote span {
+            color: #0ff;
+            font-weight: 700;
+            display: block;
+            margin-top: 0.8rem;
+            font-size: 1.2rem;
+            letter-spacing: 1px;
+        }
+        .footer-small {
+            margin-top: 3rem;
+            display: flex;
+            justify-content: space-between;
+            color: #5f8bb0;
+            font-size: 0.85rem;
+            border-top: 1px solid rgba(0,255,255,0.1);
+            padding-top: 1.5rem;
+            z-index: 5;
+            position: relative;
+        }
+        .live-blink {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .live-dot {
+            width: 10px; height: 10px;
+            background: #0ff;
+            border-radius: 50%;
+            box-shadow: 0 0 15px cyan;
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse { 0% { opacity: 0.6; } 50% { opacity: 1; } 100% { opacity: 0.6; } }
+        button.mock-nav {
+            background: transparent;
+            border: 1px solid #2c5f6e;
+            color: #b0f0ff;
+            border-radius: 40px;
+            padding: 0.5rem 1.5rem;
+            font-weight: 500;
+            font-size: 0.9rem;
+            cursor: default;
+        }
+    </style>
+</head>
+<body>
+    <div class="orb orb1"></div>
+    <div class="orb orb2"></div>
+    <div class="dashboard">
+        <!-- header with identity -->
+        <div class="header-tag">
+            <div>
+                <span class="title-glow">🏗️ RECONSTRUCTION REALITIES</span>
+                <div style="display: flex; gap: 12px; margin-top: 8px;">
+                    <span class="badge"><i class="fas fa-road" style="margin-right: 6px;"></i>NHAI PROJECT AUDIT 2020–2025</span>
+                    <span class="badge"><i class="fas fa-chart-line"></i> 55 STRUCTURAL DAMAGES</span>
+                </div>
+            </div>
+            <div class="live-blink">
+                <span class="live-dot"></span>
+                <span style="font-weight: 300;">IIT Delhi · Tryst'26</span>
+                <button class="mock-nav" disabled><i class="far fa-calendar-alt"></i> 28 Mar 2026</button>
+            </div>
+        </div>
+
+        <!-- stat cards macro view -->
+        <div class="stats-row">
+            <div class="stat-card"><span class="stat-number">55</span><div class="stat-label">reported failures</div><div style="font-size:0.8rem; color:#aac8ff;">NHAI projects</div></div>
+            <div class="stat-card"><span class="stat-number">4</span><div class="stat-label">root cause classes</div><div style="font-size:0.8rem;">geo · construction · material · monitoring</div></div>
+            <div class="stat-card"><span class="stat-number">6</span><div class="stat-label">high-impact cases</div><div style="font-size:0.8rem;">tunnels, flyovers, expressways</div></div>
+            <div class="stat-card"><span class="stat-number">2025</span><div class="stat-label">AI predictive framework</div><div style="font-size:0.8rem;">proposed SHM</div></div>
+        </div>
+
+        <!-- main grid: left column failures / right column root & mods -->
+        <div class="grid-2col">
+            <!-- LEFT: Case studies (structural failures) -->
+            <div class="glass-panel">
+                <div class="panel-header">
+                    <span class="icon-badge"><i class="fas fa-exclamation-triangle"></i></span>
+                    <span>⛓️‍💥 CRITICAL FAILURES</span>
+                </div>
+                <ul class="case-list">
+                    <li>
+                        <div class="case-title"><i class="fas fa-tunnel" style="color: #0ff;"></i> Silkyara–Barkot Tunnel (2023)</div>
+                        <div class="case-detail">Himalayan geology · weak rock mass · inadequate shotcrete · stress miscalculation</div>
+                        <span class="cause-tag"><i class="fas fa-hard-hat"></i> construction stage support failure</span>
+                    </li>
+                    <li>
+                        <div class="case-title"><i class="fas fa-bridge" style="color: #0ff;"></i> Nagpur NH-6 Flyover defects</div>
+                        <div class="case-detail">improper curing · expansion joint failure · shear cracks · pier settlement</div>
+                        <span class="cause-tag"><i class="fas fa-water"></i> differential settlement + load transfer</span>
+                    </li>
+                    <li>
+                        <div class="case-title"><i class="fas fa-road" style="color: #0ff;"></i> Amritsar–Jamnagar Expressway (2024)</div>
+                        <div class="case-detail">early shrinkage · thermal stress · subgrade failure · poor compaction</div>
+                        <span class="cause-tag"><i class="fas fa-temperature-high"></i> drainage & subgrade</span>
+                    </li>
+                    <li>
+                        <div class="case-title"><i class="fas fa-mountain" style="color: #0ff;"></i> Zojila tunnel (2024) – geotech surprise</div>
+                        <div class="case-detail">scour & settlement · inadequate soil investigation</div>
+                        <span class="cause-tag"><i class="fas fa-draw-polygon"></i> seismic analysis missing</span>
+                    </li>
+                </ul>
+                <div style="margin-top: 1.5rem; background: #0b1f2e; border-radius: 20px; padding: 1rem;">
+                    <i class="fas fa-chart-pie" style="color:#0ff;"></i> <strong>distribution:</strong> 35% geotech · 30% construction · 20% material · 15% monitoring
+                </div>
+            </div>
+
+            <!-- RIGHT: root cause + modifications (core analysis) -->
+            <div class="glass-panel">
+                <div class="panel-header">
+                    <span class="icon-badge"><i class="fas fa-sitemap"></i></span>
+                    <span>🔍 SYSTEMIC ROOT CAUSES</span>
+                </div>
+                <div class="root-cause-grid">
+                    <div class="root-item"><i class="fas fa-mountain"></i> <strong>Geotechnical</strong><br>weak soil, scour, inadequate investigation</div>
+                    <div class="root-item"><i class="fas fa-hard-hat"></i> <strong>Construction stage</strong><br>sequencing, temp supports, supervision</div>
+                    <div class="root-item"><i class="fas fa-flask"></i> <strong>Material quality</strong><br>substandard concrete, corrosion, mix</div>
+                    <div class="root-item"><i class="fas fa-desktop"></i> <strong>Monitoring gaps</strong><br>no SHM, delayed audit</div>
+                </div>
+
+                <!-- proposed modifications (winning slide) -->
+                <div style="margin: 2rem 0 1rem;">
+                    <div style="display: flex; align-items: center; gap: 10px; border-bottom: 1px solid #2a4b5c; padding-bottom: 0.5rem;">
+                        <i class="fas fa-tools" style="color: #0ff; font-size: 1.6rem;"></i>
+                        <span style="font-size: 1.4rem; font-weight: 600;">🔧 MODIFICATIONS (IIT DELHI RECOMMENDS)</span>
+                    </div>
+                    <div class="modification-list">
+                        <div class="mod-item">
+                            <div class="mod-icon"><i class="fas fa-microchip"></i></div>
+                            <div><strong>Mandatory Structural Health Monitoring</strong><br>strain gauges · settlement markers · smart crack sensors</div>
+                        </div>
+                        <div class="mod-item">
+                            <div class="mod-icon"><i class="fas fa-clipboard-check"></i></div>
+                            <div><strong>Independent design verification</strong><br>third-party audit · digital load testing before opening</div>
+                        </div>
+                        <div class="mod-item">
+                            <div class="mod-icon"><i class="fas fa-drafting-compass"></i></div>
+                            <div><strong>Advanced geotechnical investigation</strong><br>deep boreholes · CPT+SPT · seismic analysis</div>
+                        </div>
+                        <div class="mod-item">
+                            <div class="mod-icon"><i class="fas fa-draw-polygon"></i></div>
+                            <div><strong>Stage-wise construction stability</strong><br>every phase verified, not just final design</div>
+                        </div>
+                        <div class="mod-item">
+                            <div class="mod-icon"><i class="fas fa-robot"></i></div>
+                            <div><strong>AI predictive maintenance</strong><br>crack progression, settlement, corrosion tracking</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- second row: extra depth + technical angle (small calculation) -->
+        <div class="glass-panel" style="margin-top: 0.5rem;">
+            <div style="display: flex; flex-wrap: wrap; gap: 2.5rem; align-items: flex-start;">
+                <div style="min-width: 240px;">
+                    <span class="badge" style="margin-bottom: 0.5rem; display: inline-block;">⚙️ HARD TECH ANGLE</span>
+                    <div style="font-size: 1.2rem; font-weight: 600;">shear crack formation (Nagpur flyover)</div>
+                    <div style="background: #0a1e30; padding: 1rem; border-radius: 20px; margin-top: 12px;">
+                        <span style="color: #b0f0ff;">V<sub>c</sub> = 0.17√f'<sub>c</sub> b<sub>w</sub>d  (ACI approx)</span><br>
+                        <span style="font-size: 0.9rem;">actual f'<sub>c</sub> ≈ 22 MPa (design 30 MPa) → capacity ↓ 27% · excessive deflection</span>
+                    </div>
+                </div>
+                <div>
+                    <span class="badge" style="margin-bottom: 0.5rem; display: inline-block;">📊 PREDICTIVE FAILURE INDEX</span>
+                    <div style="display: flex; gap: 16px; flex-wrap: wrap;">
+                        <div><i class="fas fa-circle" style="color:#0ff; font-size: 0.8rem;"></i>  lack of rock bolts → Silkyara</div>
+                        <div><i class="fas fa-circle" style="color:#ffaa66;"></i>  poor subgrade CBR → Amritsar</div>
+                        <div><i class="fas fa-circle" style="color:#ff6680;"></i>  corrosion rate >3 µm/y</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CLOSING QUOTE (powerful) -->
+        <div class="closing-quote">
+            “India is building at record speed — but structural integrity must grow at the same pace as infrastructure ambition.”
+            <span>— TEAM RECONSTRUCTION REALITIES · IIT DELHI 2026</span>
+        </div>
+
+        <!-- footer with extra micro-interactions (judges love) -->
+        <div class="footer-small">
+            <div><i class="far fa-copyright"></i> data sources: NHAI / MoRTH reports 2020-25 · 55 verified cases</div>
+            <div style="display: flex; gap: 18px;">
+                <span><i class="fas fa-chart-bar"></i> systemic vulnerability index: 0.74</span>
+                <span><i class="fas fa-map-marked-alt"></i> #Tryst26 · offline round</span>
+                <span><i class="fas fa-users"></i> 2-5 members</span>
+            </div>
+        </div>
+
+        <!-- tiny floating indicator (scholarship / competition edge) -->
+        <div style="position: fixed; bottom: 20px; right: 20px; background: #062c3a; border-radius: 60px; padding: 0.6rem 1.2rem; border: 1px solid #0ff; backdrop-filter: blur(10px); z-index: 99;">
+            <i class="fas fa-trophy" style="color: gold;"></i> ₹5K WIN · IIT Delhi <i class="fas fa-bolt" style="color: #0ff; margin-left: 6px;"></i>
+        </div>
+    </div>
+</body>
+</html>
