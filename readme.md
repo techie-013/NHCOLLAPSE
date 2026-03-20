@@ -3,7 +3,7 @@
 ## National Highway Structural Damage Analysis (2020–2025)
 ### IIT Delhi - Tryst'26 Competition
 
-**Team:** [Your Team Name]  
+**Team:** The Garuds  
 **Track:** Civil Engineering / Structural Analysis
 
 ### 📊 Overview
